@@ -1,0 +1,103 @@
+{
+  "server_name": "hyancie-mcp-servers",
+  "server_version": "1.0.0",
+  "sse_address": "localhost:8001",
+  "mcp_tools": [
+    {
+      "tool_name": "get_weather_cn",
+      "description": "根据城市名称获取实时天气信息。",
+      "request": {
+        "method": "GET",
+        "url": "https://api.example.com/weather?city={city}&unit=metric"
+      },
+      "authentication": {
+        "type": "header",
+        "name": "X-Api-Key",
+        "value": "your-secret-api-key-for-weather"
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "description": "需要查询天气的城市名，例如 '北京'"
+          }
+        },
+        "required": ["city"]
+      },
+      "output_mapping": [
+        { "json_key": "main.temp", "description": "温度", "type": "primitive" },
+        { "json_key": "main.humidity", "description": "湿度", "type": "primitive" },
+        { "json_key": "wind.speed", "description": "风速", "type": "primitive" },
+        { "json_key": "weather[0].description", "description": "天气状况", "type": "primitive" }
+      ]
+    },
+    {
+      "tool_name": "create_user_cn",
+      "description": "使用用户名和邮箱创建一个新用户。",
+      "request": {
+        "method": "POST",
+        "url": "https://api.example.com/users"
+      },
+      "authentication": {
+        "type": "bearer",
+        "token": "your-super-secret-bearer-token"
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "新用户的用户名"
+          },
+          "email": {
+            "type": "string",
+            "description": "新用户的电子邮件地址"
+          }
+        },
+        "required": ["username", "email"]
+      },
+      "output_mapping": [
+        { "json_key": "id", "description": "用户ID", "type": "primitive" },
+        { "json_key": "username", "description": "用户名", "type": "primitive" },
+        { "json_key": "message", "description": "状态消息", "type": "primitive" }
+      ]
+    },
+    {
+      "tool_name": "food-info-search",
+      "description": "食品网页搜索工具。提取并格式化前3个搜索结果。",
+      "request": {
+        "method": "GET",
+        "url": "https://hutao.ecs32.top/search?q={query}&format=json"
+      },
+      "authentication": {
+        "type": "header",
+        "name": "X-API-Key",
+        "value": "681d739e58adfe1c51bdc28b"
+      },
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "搜索查询字符串"
+          }
+        },
+        "required": ["query"]
+      },
+      "output_mapping": [
+        {
+          "json_key": "results",
+          "type": "array",
+          "description": "搜索结果",
+          "limit": 3,
+          "items": [
+            { "json_key": "title", "description": "标题", "type": "primitive" },
+            { "json_key": "url", "description": "链接", "type": "primitive" },
+            { "json_key": "content", "description": "简介", "type": "primitive" }
+          ]
+        }
+      ]
+    }
+  ]
+}

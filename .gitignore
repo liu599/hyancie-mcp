@@ -1,0 +1,5 @@
+/inori-mcp
+/inori-mcp.exe
+/client/.env
+*.exe
+/config.prod.yaml

@@ -1,0 +1,3 @@
+# Web搜索配置
+web_search_url: "http://localhost:13301/search"
+X-API-Key: "xxxx"
