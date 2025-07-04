@@ -42,11 +42,17 @@ type OutputMap struct {
 	Items       []OutputMap `json:"items,omitempty"` // For type "array"
 }
 
+// LoggingConfig defines the structure for logging settings.
+type LoggingConfig struct {
+	FilePath string `json:"file_path"`
+}
+
 // ConfigType is the top-level structure for the entire config.json file.
 type ConfigType struct {
 	ServerName    string              `json:"server_name"`
 	ServerVersion string              `json:"server_version"`
 	SseAddress    string              `json:"sse_address"`
+	Logging       LoggingConfig       `json:"logging"`
 	McpTools      []GenericToolConfig `json:"mcp_tools"`
 
 	// Deprecated fields, kept for compatibility with old static tools if needed.

@@ -8,6 +8,7 @@ import (
 	"os"
 
 	hyancieMCP "github.com/liu599/hyancie"
+	"github.com/liu599/hyancie/logging"
 	"github.com/liu599/hyancie/tools"
 
 	"github.com/mark3labs/mcp-go/server"
@@ -31,6 +32,11 @@ func run(transport, addr string) error {
 	// 加载配置
 	if err := hyancieMCP.LoadConfig(); err != nil {
 		return fmt.Errorf("加载配置失败: %v", err)
+	}
+
+	// 初始化日志
+	if err := logging.InitLogger(); err != nil {
+		return fmt.Errorf("初始化日志失败: %v", err)
 	}
 
 	s, err := newServer()
