@@ -7,7 +7,7 @@ This project provides a dynamic, configurable MCP (Model-Context-Protocol) serve
 *   **Declarative Tool Creation**: Define tools entirely within a `config.json` file.
 *   **No Go Programming Needed**: Add new tools by simply editing the configuration.
 *   **HTTP Method Support**: Works with `GET`, `POST`, `PUT`, and other standard HTTP methods.
-*   **Flexible Authentication**: Built-in support for API Key (`header`) and `Bearer Token` authentication.
+*   **Flexible Headers**: Add any number of custom HTTP headers, perfect for API keys, bearer tokens, or any other authentication scheme.
 *   **Powerful Response Mapping**: A flexible system to parse complex JSON responses (including nested objects and arrays) into clean, human-readable output for the model.
 
 ## How It Works
@@ -92,15 +92,13 @@ Each object in the `mcp_tools` array defines a single tool.
 *   `description` (string, required): A clear description of what the tool does. This is what the AI model uses to decide when to use the tool.
 *   `input_schema` (object, required): Defines the tool's arguments using JSON Schema.
     *   `type`: Should be "object".
-    *   `properties`: An object where each key is an argument name and the value is a schema defining its type and description.
+    *   `properties`: An object where each key is an argument name and the value is a schema defining its `type` and `description`. You can also add a `default` key here to provide a fallback value if the model doesn't supply one for a non-required argument.
     *   `required`: An array of strings listing the mandatory arguments.
 *   `request` (object, required): Configures the outgoing HTTP request.
     *   `method` (string): The HTTP method (e.g., "GET", "POST").
     *   `url` (string): The API endpoint. For `GET` requests, use `{placeholder}` syntax to insert arguments into the URL. For `POST`/`PUT`, the arguments from `input_schema` are sent as the JSON request body.
-*   `authentication` (object, optional): Defines the authentication method.
-    *   `type` (string): Can be `"bearer"` or `"header"`.
-    *   For `bearer`: Provide a `token` (string).
-    *   For `header`: Provide a `name` (string) for the header key and a `value` (string) for the header value.
+*   `headers` (array, optional): An array of objects to define custom HTTP headers to be sent with the request. This is the standard way to handle authentication (e.g., API keys, bearer tokens).
+    *   Each object in the array must have a `name` (string) and a `value` (string).
 *   `output_mapping` (array, required): A powerful system for parsing the JSON response from the API into a flat, text-based format for the model.
     *   `json_key` (string): The key to extract from the JSON response. Supports dot notation for nested objects (`main.temp`) and array indexing (`weather[0].description`).
     *   `description` (string): A human-readable label for the extracted value (e.g., "Temperature").
@@ -114,7 +112,7 @@ Each object in the `mcp_tools` array defines a single tool.
 
 ### Example 1: Simple GET Request (`get_weather_cn`)
 
-This tool fetches weather data. The `city` argument is inserted into the URL. The output mapping extracts simple, nested values from the JSON response.
+This tool fetches weather data. The `city` argument is inserted into the URL, and a custom header is added for authentication. The output mapping extracts simple, nested values from the JSON response.
 
 **Config:**
 ```json
@@ -125,6 +123,12 @@ This tool fetches weather data. The `city` argument is inserted into the URL. Th
     "method": "GET",
     "url": "https://api.example.com/weather?city={city}&unit=metric"
   },
+  "headers": [
+    {
+      "name": "X-Api-Key",
+      "value": "your-secret-api-key-goes-here"
+    }
+  ],
   "input_schema": { ... },
   "output_mapping": [
     { "json_key": "main.temp", "description": "温度", "type": "primitive" },

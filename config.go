@@ -13,12 +13,12 @@ import (
 
 // GenericToolConfig defines the structure for a single tool configuration.
 type GenericToolConfig struct {
-	ToolName       string                  `json:"tool_name"`
-	Description    string                  `json:"description"`
-	Request        RequestConfig           `json:"request"`
-	Authentication *AuthenticationConfig `json:"authentication,omitempty"`
-	InputSchema    mcp.ToolInputSchema     `json:"input_schema"`
-	OutputMapping  []OutputMap             `json:"output_mapping"`
+	ToolName      string              `json:"tool_name"`
+	Description   string              `json:"description"`
+	Request       RequestConfig       `json:"request"`
+	Headers       []Header            `json:"headers,omitempty"`
+	InputSchema   mcp.ToolInputSchema `json:"input_schema"`
+	OutputMapping []OutputMap         `json:"output_mapping"`
 }
 
 // RequestConfig defines the HTTP request details.
@@ -27,12 +27,10 @@ type RequestConfig struct {
 	URL    string `json:"url"`
 }
 
-// AuthenticationConfig defines the authentication details.
-type AuthenticationConfig struct {
-	Type  string `json:"type"`
-	Token string `json:"token,omitempty"` // For bearer
-	Name  string `json:"name,omitempty"`  // For header
-	Value string `json:"value,omitempty"` // For header
+// Header represents a single HTTP header.
+type Header struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 // OutputMap defines how to map a key from the JSON response to a human-readable description.

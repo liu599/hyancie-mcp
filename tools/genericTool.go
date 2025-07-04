@@ -30,6 +30,21 @@ func AddGenericTools(s *server.MCPServer) error {
 
 		handler := func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			args := request.Params.Arguments
+			if args == nil {
+				args = make(map[string]interface{})
+			}
+
+			// Apply default values for any missing arguments
+			if currentConfig.InputSchema.Properties != nil {
+				for propName, propDetails := range currentConfig.InputSchema.Properties {
+					if _, argProvided := args[propName]; !argProvided {
+						// The underlying type of ToolInputProperty is map[string]interface{}
+						if defaultValue, defaultExists := propDetails["default"]; defaultExists {
+							args[propName] = defaultValue
+						}
+					}
+				}
+			}
 
 			var req *http.Request
 			var err error
@@ -61,13 +76,10 @@ func AddGenericTools(s *server.MCPServer) error {
 				return nil, fmt.Errorf("failed to create http request: %w", err)
 			}
 
-			// Add authentication headers if configured
-			if currentConfig.Authentication != nil {
-				switch currentConfig.Authentication.Type {
-				case "bearer":
-					req.Header.Set("Authorization", "Bearer "+currentConfig.Authentication.Token)
-				case "header":
-					req.Header.Set(currentConfig.Authentication.Name, currentConfig.Authentication.Value)
+			// Add all configured headers to the request
+			if len(currentConfig.Headers) > 0 {
+				for _, header := range currentConfig.Headers {
+					req.Header.Set(header.Name, header.Value)
 				}
 			}
 

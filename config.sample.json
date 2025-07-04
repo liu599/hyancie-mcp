@@ -10,17 +10,19 @@
         "method": "GET",
         "url": "https://api.example.com/weather?city={city}&unit=metric"
       },
-      "authentication": {
-        "type": "header",
-        "name": "X-Api-Key",
-        "value": "your-secret-api-key-for-weather"
-      },
+      "headers": [
+        {
+          "name": "X-Api-Key",
+          "value": "your-secret-api-key-for-weather"
+        }
+      ],
       "input_schema": {
         "type": "object",
         "properties": {
           "city": {
             "type": "string",
-            "description": "需要查询天气的城市名，例如 '北京'"
+            "description": "需要查询天气的城市名，例如 '北京'",
+            "default": "上海"
           }
         },
         "required": ["city"]
@@ -39,10 +41,12 @@
         "method": "POST",
         "url": "https://api.example.com/users"
       },
-      "authentication": {
-        "type": "bearer",
-        "token": "your-super-secret-bearer-token"
-      },
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer your-super-secret-bearer-token"
+        }
+      ],
       "input_schema": {
         "type": "object",
         "properties": {
@@ -70,11 +74,12 @@
         "method": "GET",
         "url": "https://hutao.ecs32.top/search?q={query}&format=json"
       },
-      "authentication": {
-        "type": "header",
-        "name": "X-API-Key",
-        "value": "681d739e58adfe1c51bdc28b"
-      },
+      "headers": [
+        {
+          "name": "X-API-Key",
+          "value": "681d739e58adfe1c51bdc28b"
+        }
+      ],
       "input_schema": {
         "type": "object",
         "properties": {
