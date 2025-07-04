@@ -3,3 +3,5 @@
 /client/.env
 *.exe
 /config.prod.yaml
+/client/
+/config.json

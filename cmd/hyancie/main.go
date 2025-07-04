@@ -18,11 +18,6 @@ func newServer() (*server.MCPServer, error) {
 		hyancieMCP.Config.ServerName,
 		hyancieMCP.Config.ServerVersion,
 	)
-	// tools.AddWebSearchTools(s) // This is now handled by generic tools
-	//tools.AddCompanySearchTools(s)
-	tools.AddFoodSearchTools(s) // Assuming this is still a static tool you want to keep
-	//tools.AddIndustrySearchTools(s)
-	//tools.AddJinaSearchTools(s)
 
 	// Add generic tools from config.json
 	if err := tools.AddGenericTools(s); err != nil {

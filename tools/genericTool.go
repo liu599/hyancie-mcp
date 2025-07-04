@@ -48,9 +48,11 @@ func AddGenericTools(s *server.MCPServer) error {
 				}
 			} else {
 				// For GET/DELETE, replace placeholders in URL
-				for key, val := range args {
-					placeholder := "{" + key + "}"
-					url = strings.ReplaceAll(url, placeholder, fmt.Sprintf("%v", val))
+				if argMap, ok := args.(map[string]interface{}); ok {
+					for key, val := range argMap {
+						placeholder := "{" + key + "}"
+						url = strings.ReplaceAll(url, placeholder, fmt.Sprintf("%v", val))
+					}
 				}
 				req, err = http.NewRequestWithContext(ctx, method, url, nil)
 			}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -58,11 +59,19 @@ type ConfigType struct {
 // Config holds the single, global instance of the application's configuration.
 var Config = &ConfigType{}
 
-// LoadConfig loads all configuration from the root config.json file.
+// LoadConfig loads all configuration from the config.json file
+// located in the same directory as the executable.
 func LoadConfig() error {
-	configFile, err := os.Open("config.json")
+	exePath, err := os.Executable()
 	if err != nil {
-		return fmt.Errorf("failed to open config.json: %w", err)
+		return fmt.Errorf("failed to get executable path: %w", err)
+	}
+	exeDir := filepath.Dir(exePath)
+	configPath := filepath.Join(exeDir, "config.json")
+
+	configFile, err := os.Open(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to open config.json at %s: %w", configPath, err)
 	}
 	defer configFile.Close()
 
