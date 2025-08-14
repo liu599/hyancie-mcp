@@ -36,7 +36,7 @@ WORKDIR /app
 COPY --from=builder --chown=1000:1000 /app/hyancie-mcp /app/
 
 # Copy the configuration file
-COPY --chown=1000:1000 config.json /app/
+COPY --chown=1000:1000 config.sample.json /app/config.json
 
 # Use the non-root user
 USER hyancie
