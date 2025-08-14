@@ -1,5 +1,5 @@
 # Build stage
-FROM harbor.vastaitech.com/dev-center-public/golang:1.23 as builder
+FROM golang:1.24-bullseye AS builder
 
 # Set the working directory
 WORKDIR /app
@@ -8,20 +8,16 @@ WORKDIR /app
 COPY go.mod go.sum ./
 
 # Download dependencies
-# RUN go mod download
-RUN go env -w GOPROXY=https://goproxy.cn,direct
-
-# 下载依赖
-RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
+RUN go mod download
 
 # Copy the source code
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o hyancie-mcp ./cmd/hyancie
+RUN go build -o hyancie-mcp ./cmd/hyancie
 
 # Final stage
-FROM harbor.vastaitech.com/dev-center/alpine:3.20.2 as prod
+FROM debian:bullseye-slim
 
 # Install ca-certificates for HTTPS requests
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
