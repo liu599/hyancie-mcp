@@ -1,5 +1,5 @@
 # Build stage
-FROM harbor.vastaitech.com/dev-center-public/golang:1.23 as builder
+FROM harbor01.litcompute.com/dev-center-public/golang:1.23 as builder
 
 # Set the working directory
 WORKDIR /app
