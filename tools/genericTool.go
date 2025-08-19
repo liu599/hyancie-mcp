@@ -57,7 +57,14 @@ func AddGenericTools(s *server.MCPServer) error {
 				return nil, fmt.Errorf("invalid url template: %w", err)
 			}
 
-			expandedURL, err := template.Expand(args)
+			// Convert args to uritemplate.Values
+			values := uritemplate.Values{}
+			for k, v := range args {
+				strValue := fmt.Sprintf("%v", v)
+				values.Set(k, uritemplate.String(strValue))
+			}
+
+			expandedURL, err := template.Expand(values)
 			if err != nil {
 				return nil, fmt.Errorf("failed to expand url template: %w", err)
 			}
