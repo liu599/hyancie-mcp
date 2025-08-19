@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 
 	hyancie "github.com/liu599/hyancie"
@@ -64,10 +63,8 @@ func AddGenericTools(s *server.MCPServer) error {
 			values := uritemplate.Values{}
 			for k, v := range args {
 				strValue := fmt.Sprintf("%v", v)
-				// Check if the method is GET, and if so, escape the string.
-				if strings.ToUpper(currentConfig.Request.Method) == "GET" {
-					strValue = url.QueryEscape(strValue)
-				}
+				// The uritemplate library handles escaping automatically.
+				// No need to manually escape the string here.
 				values.Set(k, uritemplate.String(strValue))
 			}
 
