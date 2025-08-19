@@ -3,7 +3,7 @@ stages:
   - build-and-push-tag
   - build-and-push
 variables:
-  IMGNAME: quality/hyancie-mcp
+  IMGNAME: platform/hyancie-mcp
   DOCKER_REGISTRY: harbor01.litcompute.com
   GIT_CLEAN_FLAGS: -ffdx  # 强制删除未跟踪的文件和目录，包括被忽略的文件
   GIT_STRATEGY: fetch     # 使用fetch而不是clone，减少文件操作
