@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"log"
 	"log/slog"
 	"os"
 
@@ -22,11 +23,19 @@ func InitLogger() error {
 	}
 
 	opts := &slog.HandlerOptions{
-		// You can customize level here, e.g., slog.LevelDebug
+		Level: slog.LevelDebug,
 	}
 
 	handler := slog.NewJSONHandler(file, opts)
 	Logger = slog.New(handler)
 
+	// Redirect standard logger to the same file
+	log.SetOutput(file)
+
 	return nil
 }
+	log.SetOutput(file)
+
+	return nil
+}
+

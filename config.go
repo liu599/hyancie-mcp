@@ -65,24 +65,29 @@ var Config = &ConfigType{}
 
 // LoadConfig loads all configuration from the config.json file
 // located in the same directory as the executable.
-func LoadConfig() error {
-	exePath, err := os.Executable()
-	if err != nil {
-		return fmt.Errorf("failed to get executable path: %w", err)
+func LoadConfig(configPath string) error {
+	var finalPath string
+	if filepath.IsAbs(configPath) {
+		finalPath = configPath
+	} else {
+		exePath, err := os.Executable()
+		if err != nil {
+			return fmt.Errorf("failed to get executable path: %w", err)
+		}
+		exeDir := filepath.Dir(exePath)
+		finalPath = filepath.Join(exeDir, configPath)
 	}
-	exeDir := filepath.Dir(exePath)
-	configPath := filepath.Join(exeDir, "config.json")
 
-	configFile, err := os.Open(configPath)
+	configFile, err := os.Open(finalPath)
 	if err != nil {
-		return fmt.Errorf("failed to open config.json at %s: %w", configPath, err)
+		return fmt.Errorf("failed to open config file at %s: %w", finalPath, err)
 	}
 	defer configFile.Close()
 
 	decoder := json.NewDecoder(configFile)
 	err = decoder.Decode(Config)
 	if err != nil {
-		return fmt.Errorf("failed to decode config.json: %w", err)
+		return fmt.Errorf("failed to decode config file: %w", err)
 	}
 
 	return nil

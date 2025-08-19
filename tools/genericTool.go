@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"strings"
@@ -61,6 +62,10 @@ func AddGenericTools(s *server.MCPServer) error {
 			values := uritemplate.Values{}
 			for k, v := range args {
 				strValue := fmt.Sprintf("%v", v)
+				// Check if the method is GET, and if so, escape the string.
+				if strings.ToUpper(currentConfig.Request.Method) == "GET" {
+					strValue = html.EscapeString(strValue)
+				}
 				values.Set(k, uritemplate.String(strValue))
 			}
 
@@ -81,10 +86,8 @@ func AddGenericTools(s *server.MCPServer) error {
 				if err == nil {
 					req.Header.Set("Content-Type", "application/json")
 				}
-				logging.Logger.Info("Sending HTTP request", "method", method, "url", expandedURL, "body", string(jsonBody))
 			} else {
 				req, err = http.NewRequestWithContext(ctx, method, expandedURL, nil)
-				logging.Logger.Info("Sending HTTP request", "method", method, "url", expandedURL)
 			}
 
 			if err != nil {
@@ -96,6 +99,17 @@ func AddGenericTools(s *server.MCPServer) error {
 			}
 
 			client := &http.Client{}
+			// Log the request details just before sending
+			if req.Body != nil {
+				buf := new(bytes.Buffer)
+				buf.ReadFrom(req.Body)
+				bodyStr := buf.String()
+				// And now set a new body, since you can't read it twice.
+				req.Body = io.NopCloser(bytes.NewBuffer(buf.Bytes()))
+				logging.Logger.Info("Sending HTTP request", "method", req.Method, "url", req.URL.String(), "body", bodyStr)
+			} else {
+				logging.Logger.Info("Sending HTTP request", "method", req.Method, "url", req.URL.String())
+			}
 			resp, err := client.Do(req)
 			if err != nil {
 				logging.Logger.Error("HTTP request failed", "error", err)

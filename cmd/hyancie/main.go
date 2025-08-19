@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	hyancieMCP "github.com/liu599/hyancie"
@@ -30,7 +29,7 @@ func newServer() (*server.MCPServer, error) {
 
 func run(transport, addr string) error {
 	// 加载配置
-	if err := hyancieMCP.LoadConfig(); err != nil {
+	if err := hyancieMCP.LoadConfig("config.json"); err != nil {
 		return fmt.Errorf("加载配置失败: %v", err)
 	}
 
@@ -47,14 +46,14 @@ func run(transport, addr string) error {
 	switch transport {
 	case "stdio":
 		srv := server.NewStdioServer(s)
-		log.Printf("Stdio server start")
+		logging.Logger.Info("Stdio server start")
 		return srv.Listen(context.Background(), os.Stdin, os.Stdout)
 	case "sse":
 		url := "http://" + addr
 		srv := server.NewSSEServer(s,
 			server.WithBaseURL(url),
 		)
-		log.Printf("SSE server listening on %s", addr)
+		logging.Logger.Info("SSE server listening on", "address", addr)
 		if err := srv.Start(addr); err != nil {
 			return fmt.Errorf("Server error: %v", err)
 		}
