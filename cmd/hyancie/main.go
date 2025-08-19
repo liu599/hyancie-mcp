@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	hyancieMCP "github.com/liu599/hyancie"
 	"github.com/liu599/hyancie/logging"
@@ -28,15 +29,20 @@ func newServer() (*server.MCPServer, error) {
 }
 
 func run(transport, addr string) error {
-	// 加载配置
-	if err := hyancieMCP.LoadConfig("config.json"); err != nil {
-		return fmt.Errorf("加载配置失败: %v", err)
-	}
-
 	// 初始化日志
 	if err := logging.InitLogger(); err != nil {
 		return fmt.Errorf("初始化日志失败: %v", err)
 	}
+
+	// 加载配置
+	if err := hyancieMCP.LoadConfig("config.json"); err != nil {
+		return fmt.Errorf("加载配置失败: %v", err)
+	}
+	defer logging.Close()
+	defer func() {
+		// Give the logger time to flush
+		time.Sleep(1 * time.Second)
+	}()
 
 	s, err := newServer()
 	if err != nil {
@@ -83,3 +89,4 @@ func main() {
 		panic(err)
 	}
 }
+

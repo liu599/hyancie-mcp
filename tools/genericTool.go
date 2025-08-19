@@ -8,6 +8,7 @@ import (
 	"html"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	hyancie "github.com/liu599/hyancie"
@@ -53,6 +54,8 @@ func AddGenericTools(s *server.MCPServer) error {
 			logging.Logger.Info("Tool called", "tool_name", currentConfig.ToolName, "arguments", args)
 
 			// Expand URL template
+			logging.Logger.Info("Expanding URL template", "url", currentConfig.Request.URL)
+			fmt.Println("Attempting to expand URL template:", currentConfig.Request.URL)
 			template, err := uritemplate.New(currentConfig.Request.URL)
 			if err != nil {
 				return nil, fmt.Errorf("invalid url template: %w", err)
@@ -64,7 +67,7 @@ func AddGenericTools(s *server.MCPServer) error {
 				strValue := fmt.Sprintf("%v", v)
 				// Check if the method is GET, and if so, escape the string.
 				if strings.ToUpper(currentConfig.Request.Method) == "GET" {
-					strValue = html.EscapeString(strValue)
+					strValue = url.QueryEscape(strValue)
 				}
 				values.Set(k, uritemplate.String(strValue))
 			}
@@ -140,7 +143,18 @@ func AddGenericTools(s *server.MCPServer) error {
 				return nil, fmt.Errorf("failed to process output mappings: %w", err)
 			}
 
-			return mcp.NewToolResultText(strings.Join(results, "|")), nil
+			result := &mcp.CallToolResult{
+				Content: []mcp.Content{
+					mcp.TextContent{
+						Type: "text",
+						Text: strings.Join(results, "|"),
+					},
+				},
+			}
+			result.Meta = map[string]interface{}{
+				"expandedURL": expandedURL,
+			}
+			return result, nil
 		}
 
 		s.AddTool(tool, handler)

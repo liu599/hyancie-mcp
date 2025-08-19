@@ -8,7 +8,10 @@ import (
 	hyancie "github.com/liu599/hyancie"
 )
 
-var Logger *slog.Logger
+var (
+	Logger  *slog.Logger
+	logFile *os.File
+)
 
 // InitLogger initializes the global logger.
 func InitLogger() error {
@@ -17,7 +20,8 @@ func InitLogger() error {
 		logFilePath = "access.log" // Default value
 	}
 
-	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	var err error
+	logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}
@@ -26,16 +30,18 @@ func InitLogger() error {
 		Level: slog.LevelDebug,
 	}
 
-	handler := slog.NewJSONHandler(file, opts)
+	handler := slog.NewJSONHandler(logFile, opts)
 	Logger = slog.New(handler)
 
 	// Redirect standard logger to the same file
-	log.SetOutput(file)
-
-	return nil
-}
-	log.SetOutput(file)
+	log.SetOutput(logFile)
 
 	return nil
 }
 
+// Close closes the log file.
+func Close() {
+	if logFile != nil {
+		logFile.Close()
+	}
+}
