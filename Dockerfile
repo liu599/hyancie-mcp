@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o hyancie-mcp ./cmd/hyancie
 FROM harbor01.litcompute.com/dev-center/alpine:3.20.2 as prod
 
 # Install ca-certificates for HTTPS requests
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user
 RUN useradd -r -u 1000 -m hyancie
