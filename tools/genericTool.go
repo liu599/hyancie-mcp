@@ -7,14 +7,47 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	hyancie "github.com/liu599/hyancie"
 	"github.com/liu599/hyancie/logging"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/yosida95/uritemplate/v3"
 )
+
+// expandURL replaces placeholders in a URL template with values from a map and adds the rest as query parameters.
+func expandURL(templateURL string, params map[string]interface{}) (string, error) {
+	// Create a replacer for placeholders in the URL.
+	var replacerArgs []string
+	// Keep track of params that are not part of the URL template.
+	remainingParams := make(map[string]interface{})
+	for k, v := range params {
+		placeholder := "{" + k + "}"
+		if strings.Contains(templateURL, placeholder) {
+			replacerArgs = append(replacerArgs, placeholder, url.PathEscape(fmt.Sprintf("%v", v)))
+		} else {
+			remainingParams[k] = v
+		}
+	}
+	replacer := strings.NewReplacer(replacerArgs...)
+	expandedURL := replacer.Replace(templateURL)
+
+	// Parse the URL after placeholder replacement.
+	u, err := url.Parse(expandedURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse URL after replacement: %w", err)
+	}
+
+	// Add remaining params as query parameters.
+	q := u.Query()
+	for k, v := range remainingParams {
+		q.Set(k, fmt.Sprintf("%v", v))
+	}
+	u.RawQuery = q.Encode()
+
+	return u.String(), nil
+}
 
 // AddGenericTools registers all tools defined in the global config with the MCP server.
 func AddGenericTools(s *server.MCPServer) error {
@@ -54,23 +87,9 @@ func AddGenericTools(s *server.MCPServer) error {
 			// Expand URL template
 			logging.Logger.Info("Expanding URL template", "url", currentConfig.Request.URL)
 			fmt.Println("Attempting to expand URL template:", currentConfig.Request.URL)
-			template, err := uritemplate.New(currentConfig.Request.URL)
+			expandedURL, err := expandURL(currentConfig.Request.URL, args)
 			if err != nil {
-				return nil, fmt.Errorf("invalid url template: %w", err)
-			}
-
-			// Convert args to uritemplate.Values
-			values := uritemplate.Values{}
-			for k, v := range args {
-				strValue := fmt.Sprintf("%v", v)
-				// The uritemplate library handles escaping automatically.
-				// No need to manually escape the string here.
-				values.Set(k, uritemplate.String(strValue))
-			}
-
-			expandedURL, err := template.Expand(values)
-			if err != nil {
-				return nil, fmt.Errorf("failed to expand url template: %w", err)
+				return nil, err
 			}
 
 			var req *http.Request
@@ -93,8 +112,10 @@ func AddGenericTools(s *server.MCPServer) error {
 				return nil, fmt.Errorf("failed to create http request: %w", err)
 			}
 
-			for _, header := range currentConfig.Headers {
-				req.Header.Set(header.Name, header.Value)
+			if currentConfig.Headers != nil {
+				for _, header := range currentConfig.Headers {
+					req.Header.Set(header.Name, header.Value)
+				}
 			}
 
 			client := &http.Client{}
@@ -131,7 +152,18 @@ func AddGenericTools(s *server.MCPServer) error {
 
 			var responseData map[string]interface{}
 			if err := json.Unmarshal(bodyBytes, &responseData); err != nil {
-				return nil, fmt.Errorf("failed to decode json response: %w", err)
+				// If unmarshaling fails, treat the body as a plain string.
+				// This handles cases where the API returns a non-JSON response, like a simple string.
+				results := []string{string(bodyBytes)}
+				result := &mcp.CallToolResult{
+					Content: []mcp.Content{
+						mcp.TextContent{
+							Type: "text",
+							Text: strings.Join(results, "|"),
+						},
+					},
+				}
+				return result, nil
 			}
 
 			results, err := processMappings(responseData, currentConfig.OutputMapping)
@@ -148,7 +180,8 @@ func AddGenericTools(s *server.MCPServer) error {
 				},
 			}
 			result.Meta = map[string]interface{}{
-				"expandedURL": expandedURL,
+				"expandedURL":      expandedURL,
+				"args": args,
 			}
 			return result, nil
 		}
