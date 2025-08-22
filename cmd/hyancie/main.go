@@ -38,7 +38,6 @@ func run(transport, addr string) error {
 	if err := hyancieMCP.LoadConfig("config.json"); err != nil {
 		return fmt.Errorf("加载配置失败: %v", err)
 	}
-	defer logging.Close()
 	defer func() {
 		// Give the logger time to flush
 		time.Sleep(1 * time.Second)
