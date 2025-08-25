@@ -92,9 +92,18 @@ func main() {
 	)
 	// Set default SSE address from config, but allow override from command line.
 	addr := flag.String("sse-address", hyancieMCP.Config.SseAddress, "The host and port to start the sse server on")
+	baseUrl := flag.String("sse-base-url", hyancieMCP.Config.SseBaseUrl, "The public-facing base URL for the SSE server")
 	flag.Parse()
 
-	if err := run(transport, *addr); err != nil {
+	// Update config with flag values if they are provided
+	if *addr != "" {
+		hyancieMCP.Config.SseAddress = *addr
+	}
+	if *baseUrl != "" {
+		hyancieMCP.Config.SseBaseUrl = *baseUrl
+	}
+
+	if err := run(transport, hyancieMCP.Config.SseAddress); err != nil {
 		panic(err)
 	}
 }

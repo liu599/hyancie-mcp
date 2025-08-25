@@ -62,13 +62,14 @@ The server can run in two transport modes: `stdio` (for local communication with
 You can specify the address for the SSE server.
 
 ```bash
-./hyancie-mcp.exe -t sse --sse-address localhost:8001
+./hyancie-mcp.exe -t sse --sse-address 0.0.0.0:8001 --sse-base-url https://xx.com
 ```
 
-| Flag          | Short | Description                               | Default Value |
-|---------------|-------|-------------------------------------------|---------------|
-| `--transport` | `-t`  | Transport type (`stdio` or `sse`)         | `stdio`       |
-| `--sse-address` |       | The host and port for the SSE server.     | `localhost:8001` (from `config.json`) |
+| Flag             | Short | Description                                                                 | Default Value (from `config.json`) |
+|------------------|-------|-----------------------------------------------------------------------------|------------------------------------|
+| `--transport`    | `-t`  | Transport type (`stdio` or `sse`)                                           | `stdio`                            |
+| `--sse-address`  |       | The internal host and port for the SSE server to listen on.                 | `0.0.0.0:8001`                     |
+| `--sse-base-url` |       | The public-facing base URL for the SSE server (e.g., for K8s Ingress).       | `http://localhost:8001`            |
 
 
 ## Configuration (`config.json` Deep Dive)
