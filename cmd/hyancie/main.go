@@ -56,7 +56,7 @@ func run(transport, addr string) error {
 		logging.Logger.Info("Stdio server start")
 		return srv.Listen(context.Background(), os.Stdin, os.Stdout)
 	case "sse":
-		url := "http://" + addr
+		url := hyancieMCP.Config.SseBaseUrl
 		c := cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},
 			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},

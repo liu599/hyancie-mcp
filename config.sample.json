@@ -1,7 +1,8 @@
 {
   "server_name": "hyancie-mcp-servers",
   "server_version": "1.0.0",
-  "sse_address": "localhost:8001",
+  "sse_address": "0.0.0.0:8001",
+  "sse_base_url": "http://localhost:8001",
   "logging": {
     "file_path": "access.log"
   },

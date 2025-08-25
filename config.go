@@ -52,6 +52,7 @@ type ConfigType struct {
 	ServerName    string              `json:"server_name"`
 	ServerVersion string              `json:"server_version"`
 	SseAddress    string              `json:"sse_address"`
+	SseBaseUrl    string              `json:"sse_base_url"`
 	Logging       LoggingConfig       `json:"logging"`
 	McpTools      []GenericToolConfig `json:"mcp_tools"`
 
