@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/liu599/hyancie/tools"
 
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/rs/cors"
 )
 
 func newServer() (*server.MCPServer, error) {
@@ -55,11 +57,19 @@ func run(transport, addr string) error {
 		return srv.Listen(context.Background(), os.Stdin, os.Stdout)
 	case "sse":
 		url := "http://" + addr
+		c := cors.New(cors.Options{
+			AllowedOrigins:   []string{"*"},
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedHeaders:   []string{"*"},
+			AllowCredentials: true,
+		})
+
 		srv := server.NewSSEServer(s,
 			server.WithBaseURL(url),
 		)
 		logging.Logger.Info("SSE server listening on", "address", addr)
-		if err := srv.Start(addr); err != nil {
+		handler := c.Handler(srv)
+		if err := http.ListenAndServe(addr, handler); err != nil {
 			return fmt.Errorf("Server error: %v", err)
 		}
 	default:
@@ -88,4 +98,3 @@ func main() {
 		panic(err)
 	}
 }
-

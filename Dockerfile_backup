@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24-bullseye AS builder
+FROM harbor01.litcompute.com/dev-center-public/golang:1.23 as builder
 
 # Set the working directory
 WORKDIR /app
@@ -8,19 +8,24 @@ WORKDIR /app
 COPY go.mod go.sum ./
 
 # Download dependencies
-RUN go mod download
+# RUN go mod download
+RUN go env -w GOPROXY=https://goproxy.cn,direct
+
+# 下载依赖
+RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
 
 # Copy the source code
 COPY . .
 
 # Build the application
-RUN go build -o hyancie-mcp ./cmd/hyancie
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o hyancie-mcp ./cmd/hyancie
 
 # Final stage
-FROM debian:bullseye-slim
+FROM harbor01.litcompute.com/dev-center/alpine:3.20.2 as prod
 
 # Install ca-certificates for HTTPS requests
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache shadow
 
 # Create a non-root user
 RUN useradd -r -u 1000 -m hyancie
@@ -32,7 +37,7 @@ WORKDIR /app
 COPY --from=builder --chown=1000:1000 /app/hyancie-mcp /app/
 
 # Copy the configuration file
-COPY --chown=1000:1000 config.json /app/
+COPY --chown=1000:1000 config.sample.json /app/config.json
 
 # Use the non-root user
 USER hyancie

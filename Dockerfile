@@ -1,5 +1,5 @@
 # Build stage
-FROM harbor01.litcompute.com/dev-center-public/golang:1.23 as builder
+FROM harbor01.litcompute.com/platform/hyancie-mcp:main-96393bdd as builder
 
 # Set the working directory
 WORKDIR /app
